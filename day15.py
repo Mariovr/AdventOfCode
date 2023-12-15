@@ -34,8 +34,6 @@ def cal_valb(boxes):
 def add_lens(boxes, string):
     boxnum = cal_val(string[:string.index('=')])
     action = string.split('=')
-    print(boxes[boxnum])
-    print(action)
     if boxes[boxnum] != [''] and action[0] in [ act[0] for act in boxes[boxnum] ] :
         index = [ act[0] for act in boxes[boxnum] ].index(action[0])
         boxes[boxnum][index]  = action
@@ -49,15 +47,11 @@ def add_lens(boxes, string):
 def remove_lens(boxes, string):
     boxnum = cal_val(string[:string.index('-')])
     action = string.split('-')
-    print(boxes[boxnum])
-    print(action)
     if boxes[boxnum] != [''] and action[0] in [ act[0] for act in boxes[boxnum] ] :
         index = [ act[0] for act in boxes[boxnum] ].index(action[0])
         del boxes[boxnum][index]  
     else:
         pass
-
-
 
 def main(*args , **kwargs):
     maplist = []
@@ -84,7 +78,7 @@ def main(*args , **kwargs):
         else:
             add_lens(boxes,string)
 
-    print(boxes)
+    #print(boxes)
     result = cal_valb(boxes)
     print('result b: ', result)
     
