@@ -21,41 +21,57 @@ class Hmap(object):
         self.hdim = len(hmap[0])
         self.startpos = Position(startpos ,0 , (0,1), 0, self.hdim, self.vdim )
         self.endpos = Position((self.vdim - 1 , self.hdim - 1), 0, (0,1), 0, self.hdim, self.vdim   )
-        self.minhloss = 0
+        self.minhloss = self.go_naive_end(self.startpos, self.endpos)
+        self.minhloss = 636 #upperbound of previous bad run
         self.poslist = [self.startpos]
         self.checked = []
 
     def run(self):
         steps = 0
-        while(True ):
-            npos = []
-            for index, cpos in enumerate(self.poslist):
-                #print(cpos)
-                npos += [(index, pos, self.cost(pos, self.endpos)) for pos in  self.get_next_pos(cpos)]
-                #print (npos)
+        while( len(self.poslist) ):
+            spos = [( pos, self.cost(pos, self.endpos)) for pos in self.poslist ]
+            extend = min(spos , key = lambda x: x[1])
+            #print(npos) 
+            npos = self.get_next_pos(extend[0])
+            if steps % 100 == 0:
+                #test = self.go_naive_end(extend[0], self.endpos)
+                #if test < self.minhloss:
+                    #self.minhloss = test
+                self.clean_death_path()
+                print('Naieve End: ', self.minhloss)
+                print('Current Hloss: ', extend[0].hloss)
 
-            extend = min(npos , key = lambda x: x[2])
-            if steps % 1000 == 0:
-                print(extend[2])
-            for startpos in [pos[1] for pos in npos if pos[0] == extend[0]]:
-                if startpos not in self.checked and self.poslist.count(startpos) < 4:
+            for startpos in npos:
+                if startpos not in self.checked and startpos not in self.poslist:
                     self.poslist.append(startpos) 
                 #print(self.poslist)
-
-            self.checked.append(self.poslist[extend[0]] )
-            del self.poslist[extend[0]]
+            self.checked.append(extend[0])
+            try:
+                self.poslist.remove(extend[0])
+            except ValueError:
+                pass
             steps += 1
-            if extend[1] == self.endpos:
-                break
+            if extend[0].coord == self.endpos.coord:
+                if self.minhloss > extend[0].hloss:
+                    self.minhloss = extend[0].hloss
+                    print('Change in minhloss: ', self.minhloss)
+                #break
 
-        return extend[1].hloss #only one path with posminpath = True should be left at the end
+        return self.minhloss #only one path with posminpath = True should be left at the end
+
+    def clean_death_path(self):
+        for pos in self.poslist:
+            if self.cost(pos,self.endpos) > self.minhloss:
+                self.checked.append(pos)
+                self.poslist.remove(pos)
 
     def cost(self, pos, end):
         return pos.hloss + abs(pos.coord[0] - end.coord[0]) + abs(pos.coord[1] - end.coord[1])
+        #return pos.hloss 
 
     def go_naive_end(self,start, end ):
         curpos = start
-        while(curpos != end):
+        while(curpos.coord != end.coord):
             steps = curpos.get_pos_steps()
             curpos = curpos.step(steps[0], self.hmap)
         return curpos.hloss
@@ -117,7 +133,8 @@ class Position(object):
 
 
     def __eq__(self, other):
-        return (self.coord) == (other.coord)
+        #return (self.coord, self.sdirsteps, self.cdir) == (other.coord, other.sdirsteps, other.cdir)
+        return (self.coord, self.sdirsteps, self.cdir) == (other.coord, other.sdirsteps, other.cdir)
 
     def __str__(self):
         outputstr = 'Coord: ' + str(self.coord) + '\n'
@@ -155,10 +172,10 @@ if __name__ == "__main__":
 2546548887735
 4322674655533"""
 
-#    lines = [line.strip() for line in stringlist.strip().split('\n')]
-#    print(lines)
-#    assert main(lines) == 102
-#
+    lines = [line.strip() for line in stringlist.strip().split('\n')]
+    print(lines)
+    assert main(lines) == 102
+
     file = "inputday17.txt"
     with open(file,'r') as f:
         lines = f.readlines()
