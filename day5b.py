@@ -9,12 +9,7 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python 
 
-import os
-import sys
 import re
-from functools import reduce
-#import numpy as np
-
 
 class Lmap(object):
 
@@ -25,12 +20,8 @@ class Lmap(object):
         self.map = []
 
     def get_map(self, seed):
-        #self.map.sort(key= lambda x : x[1])
         for tup in self.map:
             maxnum = tup[1] + tup[2]
-            #print(seed)
-            #print('tup' , tup[1])
-            #print('tup', tup[2])
             if seed >= tup[1] and seed < maxnum:
                 return tup[0] + seed - tup[1]
 
@@ -38,12 +29,8 @@ class Lmap(object):
         return seed
 
     def get_index(self,loc):
-        #self.map.sort(key= lambda x : x[1])
         for tup in self.map:
             maxnum = tup[0] + tup[2]
-            #print(seed)
-            #print('tup' , tup[1])
-            #print('tup', tup[2])
             if loc >= tup[0] and loc < maxnum:
                 return tup[1] + loc - tup[0]
 
@@ -91,23 +78,29 @@ def main(*args , **kwargs):
     #Noticed that in the first slice there is already a very low location only 79 million
     #so if we reverse the lookup and go from locations back to seed, we have to do at max 79 million 
     #calculations and the first location that reaches a slice of seeds is the minimum location.
-    #This was guaranteed to find a reasonably fast solution, and is easier then 
+    #This guarantees to find a reasonably fast solution, and is easier as
     #keeping track of intervals and splits of intervals, if we would go from seed interval to location.
     maxloc = 79753136
     maplist.reverse()
     mlist = maplist
-    for i in range(11811371,maxloc):
-      print('we are at location: ' + str(i) )
+    stop = False
+    for i in range(0,maxloc):
+      if i %1000000 == 0 :
+          print('we are at location: ' + str(i) )
       index = i
       for mapl in mlist:
           index = mapl.get_index(index)
-            
+
       for snum in range(0,len(seedlist),2):
           if seedlist[snum] <= index and (seedlist[snum] + seedlist[snum+1] - 1) >= index:
               print('seed: ' + str(index))
-              print('between: ' + seedlist[snum])
-              sys.exit(1)
-     
+              print('between: ' + str(seedlist[snum]))
+              minloc = i 
+              stop = True
+              break
+      if stop:
+          break
+
 
     print('minloc: ', minloc)
 

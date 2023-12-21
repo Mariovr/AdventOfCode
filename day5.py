@@ -13,7 +13,6 @@ import os
 import sys
 import re
 from functools import reduce
-#import numpy as np
 
 
 class Lmap(object):

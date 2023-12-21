@@ -11,7 +11,6 @@
 
 import os
 import sys
-import numpy as np
 import re
 
 class BeamPos(object):
@@ -188,9 +187,9 @@ if __name__ == "__main__":
         print(len(lines))
     assert main(*stringlist) == 51
 
-#    file = "inputday16.txt"
-#    with open(file,'r') as f:
-#        lines = f.readlines()
-#        lines = [line.strip() for line in lines]
-#    result = main(lines)
-#    print('Result is: ', result)
+    file = "inputday16.txt"
+    with open(file,'r') as f:
+        lines = f.readlines()
+        lines = [line.strip() for line in lines]
+    result = main(lines)
+    print('Result is: ', result)
