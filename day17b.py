@@ -11,7 +11,6 @@
 
 import os
 import sys
-import numpy as np
 import re
 
 class Hmap(object):
@@ -21,9 +20,7 @@ class Hmap(object):
         self.hdim = len(hmap[0])
         self.startpos = Position(startpos ,0 , (0,1), 0, self.hdim, self.vdim )
         self.endpos = Position((self.vdim - 1 , self.hdim - 1), 0, (0,1), 0, self.hdim, self.vdim   )
-        #self.minhloss = self.go_naive_end(self.startpos, self.endpos)
-        #print('Naieve end: ' , self.minhloss)
-        self.minhloss = 650 #upperbound of previous bad run
+        self.minhloss = 800  #upperbound due to previous bad run
         self.poslist = [self.startpos]
         self.checked = []
 
@@ -32,12 +29,12 @@ class Hmap(object):
         while( len(self.poslist) ):
             spos = [( pos, self.cost(pos, self.endpos)) for pos in self.poslist ]
             extend = min(spos , key = lambda x: x[1])
-            #print(npos) 
             npos = self.get_next_pos(extend[0])
-            if steps % 100 == 0:
-                #test = self.go_naive_end(extend[0], self.endpos)
-                #if test < self.minhloss:
-                    #self.minhloss = test
+
+            if steps % 300 == 0:
+                test = pos.hloss + abs(pos.coord[0] - self.endpos.coord[0])*6 + abs(pos.coord[1] - self.endpos.coord[1])*6 #
+                if test < self.minhloss:
+                    self.minhloss = test
                 self.clean_death_path()
                 print('Naieve End: ', self.minhloss)
                 print('Current Hloss: ', extend[0].hloss)
@@ -58,7 +55,7 @@ class Hmap(object):
                     print('Change in minhloss: ', self.minhloss)
                 break
 
-        return self.minhloss #only one path with posminpath = True should be left at the end
+        return self.minhloss 
 
     def clean_death_path(self):
         for pos in self.poslist:
@@ -67,15 +64,8 @@ class Hmap(object):
                 self.poslist.remove(pos)
 
     def cost(self, pos, end):
-        return pos.hloss + abs(pos.coord[0] - end.coord[0]) + abs(pos.coord[1] - end.coord[1])
+        return pos.hloss + abs(pos.coord[0] - end.coord[0]) + abs(pos.coord[1] - end.coord[1]) #increase mult factor of cost function to get faster first guesses, but the higher cost the higher risk on deviations from answer.
         #return pos.hloss 
-
-    def go_naive_end(self,start, end ):
-        curpos = start
-        while(curpos.coord != end.coord):
-            steps = curpos.get_pos_steps()
-            curpos = curpos.step(steps[0], self.hmap)
-        return curpos.hloss
 
     def get_next_pos(self,cpos):
         steps = cpos.get_pos_steps()
@@ -109,11 +99,11 @@ class Position(object):
         else:
             sdirs = 1
         assert sdirs <= self.maxstepssd
-        return Position( (self.coord[0] + coord[0] , self.coord[1] + coord[1] ), self.hloss + hmap[newc0][newc1] , coord, sdirs, self.hdim, self.vdim)
+        return Position( (newc0 , newc1 ), self.hloss + hmap[newc0][newc1] , coord, sdirs, self.hdim, self.vdim)
 
     def get_pos_steps(self):
         steps = []
-        if self.sdirsteps >= 4:
+        if self.sdirsteps >= self.minstepsd:
             boundchecksteps = 1
         else:
             boundchecksteps = (self.minstepsd-self.sdirsteps)
@@ -121,30 +111,29 @@ class Position(object):
         for nd in self.ndir:
            add = True
 
-           match nd:
-               case 'R':
-                   if self.sdirsteps >= self.minstepsd: 
+           if nd == 'R':
+                   if self.sdirsteps >= self.minstepsd: #switch of dir is allowed 
                        step = (self.cdir[1], self.cdir[0])
                        if self.coord[0] in self.boundchecks[0]:
-                           if self.coord[0] + step[0]*boundchecksteps >= self.vdim or self.coord[0]+ step[0]*boundchecksteps < 0:
+                           if self.coord[0] + step[0]*(self.minstepsd-1) >= self.vdim or self.coord[0]+ step[0]*(self.minstepsd-1) < 0:
                               add = False
                        if self.coord[1] in self.boundchecks[1]:
-                           if self.coord[1] + step[1]* boundchecksteps >= self.hdim or self.coord[1] +step[1] * boundchecksteps <  0:
+                           if self.coord[1] + step[1]*(self.minstepsd-1) >= self.hdim or self.coord[1] +step[1] * (self.minstepsd-1) <  0:
                               add = False
                        if add:
                            steps.append(  step )
-               case 'L':
-                   if self.sdirsteps >= self.minstepsd: 
+           elif nd == 'L':
+                   if self.sdirsteps >= self.minstepsd: #switch of dir is allowed 
                        step = (-1* self.cdir[1], -1* self.cdir[0])
                        if self.coord[0] in self.boundchecks[0]:
-                           if self.coord[0] + step[0]*boundchecksteps >= self.vdim or self.coord[0]+ step[0]*boundchecksteps < 0:
+                           if self.coord[0] + step[0]*(self.minstepsd-1)>= self.vdim or self.coord[0]+ step[0]*(self.minstepsd-1)< 0:
                               add = False
                        if self.coord[1] in self.boundchecks[1]:
-                           if self.coord[1] + step[1]* boundchecksteps >= self.hdim or self.coord[1] +step[1] * boundchecksteps <  0:
+                           if self.coord[1] + step[1]* (self.minstepsd-1)>= self.hdim or self.coord[1] +step[1] * (self.minstepsd-1)<  0:
                               add = False
                        if add:
                            steps.append(  step )
-               case 'S':
+           elif nd == 'S':
                    if self.sdirsteps < self.maxstepssd: 
                        step = (self.cdir[0],self.cdir[1])
                        if self.coord[0] in self.boundchecks[0]:
@@ -160,19 +149,18 @@ class Position(object):
 
 
     def __eq__(self, other):
-        #return (self.coord, self.sdirsteps, self.cdir) == (other.coord, other.sdirsteps, other.cdir)
+        #return (self.coord,  self.cdir) == (other.coord, other.cdir) #to get a good first guess to set minhloss
         return (self.coord, self.sdirsteps, self.cdir) == (other.coord, other.sdirsteps, other.cdir)
 
     def __str__(self):
         outputstr = 'Coord: ' + str(self.coord) + '\n'
         outputstr += 'Hloss: ' + str(self.hloss) + '\n'
-        ##outputstr += 'ShortestFound: ' + str(self.sfound) + '\n'
+        outputstr += 'sdirsteps: ' + str(self.sdirsteps) + '\n'
         return outputstr
 
 def main(args , **kwargs):
     maplist = []
     result = 0
-
     for line in args:
         maplist.append([int(i) for i in line])
         print(line)
@@ -203,10 +191,10 @@ if __name__ == "__main__":
     print(lines)
     assert main(lines) ==  94
 
-#    file = "inputday17.txt"
-#    with open(file,'r') as f:
-#        lines = f.readlines()
-#        lines = [line.strip() for line in lines]
-#    result = main(lines)
-#    print('Result is: ', result)
-#
+    file = "inputday17.txt"
+    with open(file,'r') as f:
+        lines = f.readlines()
+        lines = [line.strip() for line in lines]
+    result = main(lines)
+    print('Result is: ', result)
+

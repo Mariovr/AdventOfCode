@@ -11,7 +11,6 @@
 
 import os
 import sys
-import numpy as np
 import re
 
 def test_c(newc, gmap,e):
@@ -26,6 +25,7 @@ def main(args , **kwargs):
     gmap = {}
     result = 0
     numstep = 64 #numstep = 6 for sample problem.
+    numstep = 10000
     startc = (0,0)
 
     for ind , line in enumerate(args):
@@ -34,11 +34,11 @@ def main(args , **kwargs):
             startc = (ind , sp.start() )
         gmap.update( {(ind,i):ch for i,ch in enumerate(line)} )
 
-    print(gmap)
+    #print(gmap)
     
     gmap[startc] = '.'
     d = set([startc])
-    print(d)
+    #print(d)
     for i in range(numstep):
         e = set()
         for coord in d:
@@ -46,7 +46,7 @@ def main(args , **kwargs):
                 test_c(newc,gmap,e)
             #print(e)
         d = e
-        print(len(d))
+        print('At step: ' , i+1 , 'we have pos occupied: ' , len(d))
 
     result = len(d)
     return result
@@ -66,8 +66,8 @@ if __name__ == "__main__":
 """
 #    lines = [line.strip() for line in stringlist.strip().split('\n')]
 #    print(lines)
-    #assert main(lines) == 16
-
+#    assert main(lines) == 16
+#
     file = "inputday21.txt"
     with open(file,'r') as f:
         lines = f.readlines()
