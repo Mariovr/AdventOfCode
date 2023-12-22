@@ -34,12 +34,11 @@ class Space(object):
         self.bricklist = bricklist
         self.bricklist.sort(key=lambda x : x.startc[2]) #sort bricks down
         self.set_ids()
-        print([str(brick) for brick in self.bricklist])
+        #print([str(brick) for brick in self.bricklist])
         self.space = {}
         self.occupy_space()
-        print(self.space)
         self.move_bricks_down()
-        print(self.space)
+        #print(self.space)
 
     def set_ids(self):
         for index, brick in enumerate(self.bricklist):
@@ -53,7 +52,6 @@ class Space(object):
                 coord[brick.dim] += 1
 
     def move_brick_down(self, brick):
-        print(brick)
         if brick.startc[2] == 1:
             return False
         down = True
@@ -80,16 +78,17 @@ class Space(object):
         return down
 
     def move_bricks_down(self):
+        print('Starting to move bricks down.')
         for brick in self.bricklist:
-            print(brick)
             down = True
             while(down):
                 down = self.move_brick_down(brick)
-                print('moved brick down:' , brick.id)
+        print('Moved bricks down')
 
     def count_disin_bricks(self):
+        print('Start to count blocks that can be dissociated.')
         dissum = 0
-        for brick in self.bricklist:
+        for index, brick in enumerate(self.bricklist):
             coord = deepcopy(brick.startc)
             nosolosupport = True
             if brick.dim != 2: #take into account vertical bricks.
@@ -107,8 +106,10 @@ class Space(object):
                         nosolosupport = False
 
             if nosolosupport:
-                print('Counted: , ', brick.id)
+                #print('Counted: , ', brick.id)
                 dissum += 1
+            if index % 100 ==0:
+                print( "Tried " , index , " blocks already.")
         return dissum
 
 
@@ -137,7 +138,6 @@ def main(args , **kwargs):
     result = 0
 
     for index, line in enumerate(args):
-        print(line)
         coord = line.split('~')
         bricklist.append(Brick([int(s) for s in coord[0].split(',')] ,[int(e) for e in coord[1].split(',')], index) )
 
