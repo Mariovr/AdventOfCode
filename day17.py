@@ -11,7 +11,6 @@
 
 import os
 import sys
-import numpy as np
 import re
 
 class Hmap(object):
@@ -22,7 +21,7 @@ class Hmap(object):
         self.startpos = Position(startpos ,0 , (0,1), 0, self.hdim, self.vdim )
         self.endpos = Position((self.vdim - 1 , self.hdim - 1), 0, (0,1), 0, self.hdim, self.vdim   )
         self.minhloss = self.go_naive_end(self.startpos, self.endpos)
-        self.minhloss = 636 #upperbound of previous bad run
+        self.minhloss = 652 #upperbound of previous runs, it can be determined by either having a larger heuristic cost function (multiply a factor to the difference in coordinates with the endpoint) or reduce the searchspace of unique positions by not including the number of steps in same direction, and/or the current stepdirection for the uniqueness of a position.
         self.poslist = [self.startpos]
         self.checked = []
 
@@ -33,12 +32,8 @@ class Hmap(object):
             extend = min(spos , key = lambda x: x[1])
             #print(npos) 
             npos = self.get_next_pos(extend[0])
-            if steps % 100 == 0:
-                #test = self.go_naive_end(extend[0], self.endpos)
-                #if test < self.minhloss:
-                    #self.minhloss = test
+            if steps % 1000 == 0:
                 self.clean_death_path()
-                print('Naieve End: ', self.minhloss)
                 print('Current Hloss: ', extend[0].hloss)
 
             for startpos in npos:
@@ -55,7 +50,7 @@ class Hmap(object):
                 if self.minhloss > extend[0].hloss:
                     self.minhloss = extend[0].hloss
                     print('Change in minhloss: ', self.minhloss)
-                #break
+                break
 
         return self.minhloss #only one path with posminpath = True should be left at the end
 
@@ -66,8 +61,8 @@ class Hmap(object):
                 self.poslist.remove(pos)
 
     def cost(self, pos, end):
+        #return pos.hloss + abs(pos.coord[0] - end.coord[0])*2 + abs(pos.coord[1] - end.coord[1])*2 #can return 652
         return pos.hloss + abs(pos.coord[0] - end.coord[0]) + abs(pos.coord[1] - end.coord[1])
-        #return pos.hloss 
 
     def go_naive_end(self,start, end ):
         curpos = start
@@ -96,7 +91,7 @@ class Position(object):
         self.ndir = ['S', 'R' , 'L'] #same path first option always progress in same direction
         self.hdim = hdim
         self.vdim = vdim
-        self.boundchecks = [(0,self.vdim-1) , (0,self.hdim-1) ]
+        self.boundchecks = ((0,self.vdim-1) , (0,self.hdim-1) )
 
     def step(self, coord, hmap):
         newc0 = self.coord[0] + coord[0] 
@@ -111,14 +106,13 @@ class Position(object):
     def get_pos_steps(self):
         steps = []
         for nd in self.ndir:
-           match nd:
-               case 'R':
-                   steps.append( (self.cdir[1], self.cdir[0]) )
-               case 'L':
-                   steps.append( (-1* self.cdir[1], -1* self.cdir[0]) )
-               case 'S':
-                   if self.sdirsteps < 3: 
-                       steps.append( (self.cdir[0],self.cdir[1]) )
+           if nd == 'R':
+               steps.append( (self.cdir[1], self.cdir[0]) )
+           elif nd == 'L':
+               steps.append( (-1* self.cdir[1], -1* self.cdir[0]) )
+           elif nd == 'S':
+               if self.sdirsteps < 3: 
+                   steps.append( (self.cdir[0],self.cdir[1]) )
 
         if self.coord[0] in self.boundchecks[0]:
             for index, step in enumerate(steps):
@@ -133,13 +127,12 @@ class Position(object):
 
 
     def __eq__(self, other):
-        #return (self.coord, self.sdirsteps, self.cdir) == (other.coord, other.sdirsteps, other.cdir)
+        #return (self.coord) == (other.coord) #faster to find good upperbound, can also add one of sdirsteps or cdir as extra, to find slightly better upperbound, but will not give correct result.
         return (self.coord, self.sdirsteps, self.cdir) == (other.coord, other.sdirsteps, other.cdir)
 
     def __str__(self):
         outputstr = 'Coord: ' + str(self.coord) + '\n'
         outputstr += 'Hloss: ' + str(self.hloss) + '\n'
-        ##outputstr += 'ShortestFound: ' + str(self.sfound) + '\n'
         return outputstr
 
 def main(args , **kwargs):
