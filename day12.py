@@ -11,7 +11,6 @@
 
 import os
 import sys
-import numpy as np
 import re
 from itertools import combinations
 

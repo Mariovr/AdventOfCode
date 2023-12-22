@@ -11,7 +11,6 @@
 
 import os
 import sys
-import numpy as np
 import re
 
 class Park(object):
@@ -23,7 +22,7 @@ class Park(object):
         self.mult = mult
         self.cache = {}
         self.set_mult_data()
-        print(self.locations)
+        #print(self.locations)
 
     def set_mult_data(self):
         self.groups = self.g*self.mult
@@ -126,7 +125,7 @@ def main(*args , **kwargs):
         field = Park([int(num) for num in d[1].split(',')], d[0], mult = 5)
         iresult = field.cnt_placements(0)
 
-        print('iresult: ',iresult )
+        #print('iresult: ',iresult )
         result += iresult
 
     return result
