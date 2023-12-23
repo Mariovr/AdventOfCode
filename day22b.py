@@ -14,7 +14,7 @@ import sys
 import re
 from copy import deepcopy
 
-#remark runs much faster with python compiler as with pypy. So please run with python.
+#remark runs much faster with python interpreter as with pypy. So please run in python.
 class Brick(object):
     def __init__(self, startc , endc, ident):
         self.startc = startc
@@ -22,12 +22,14 @@ class Brick(object):
         self.len = max(sizes)
         self.dim = sizes.index(self.len) 
         self.id = ident
+        self.holdbrick = set()
 
     def __str__(self):
         outputstr = 'Start: ' + str(self.startc) + '\n'
         outputstr += 'Len: ' + str(self.len) + '\n'
         outputstr += 'Dim: ' + str(self.dim) + '\n'
         outputstr += 'Ident: ' + str(self.id) + '\n'
+        outputstr += 'Holdbrick id: ' +  str(self.holdbrick) + '\n'
         return outputstr
 
 class Space(object):
@@ -39,6 +41,8 @@ class Space(object):
         self.space = {}
         self.occupy_space()
         self.move_bricks_down()
+        self.cal_hold_bricks()
+        print([str(brick) for brick in self.bricklist])
         #print(self.space)
 
     def set_ids(self):
@@ -78,6 +82,45 @@ class Space(object):
                 del self.space[(coord[0],coord[1],coord[2]+brick.len)]
         return down
 
+    def count_bricks_above(self):
+        print('Start to count blocks that will fall if given block is taken away.')
+        dissum = 0
+        for index, brick in enumerate(self.bricklist):
+            dissum += len(brick.holdbrick)
+        return dissum
+
+    def cal_hold_bricks(self):
+        for index, brick in enumerate(self.bricklist):
+            fallbricks = set([brick.id])
+            brick.holdbrick = self.set_hold_brick(brick, fallbricks)
+            brick.holdbrick.remove(brick.id)
+            if index % 100 ==0:
+                print( "Tried " , index , " blocks already.")
+                print("Current fallbricks: ", fallbricks)
+
+    def set_hold_brick(self, brick, fallbricks):
+            coord = deepcopy(brick.startc)
+            nosolosupport = True
+            if brick.dim != 2: #take into account vertical bricks.
+                coord[2] += 1
+                for i in range(brick.len):
+                    if tuple(coord) in self.space.keys():
+                        testid = self.bricklist[self.space[tuple(coord)]].id
+                        if testid not in fallbricks and not self.check_other_support(coord, fallbricks):
+                            fallbricks.add(self.space[tuple(coord)])
+                            fallbricks |= self.set_hold_brick(self.bricklist[self.space[tuple(coord)]], fallbricks)
+                    coord[brick.dim] += 1
+            else:
+                coord[2] += brick.len
+                if tuple(coord) in self.space.keys():
+                    testid = self.bricklist[self.space[tuple(coord)]].id
+                    if testid not in fallbricks and not self.check_other_support(coord, fallbricks):
+                        #brick.holdbrick |= self.bricklist[self.space[tuple(coord)]].holdbrick
+                        fallbricks.add(self.space[tuple(coord)])
+                        fallbricks |= self.set_hold_brick(self.bricklist[self.space[tuple(coord)]], fallbricks)
+
+            return fallbricks
+
     def move_bricks_down(self):
         print('Starting to move bricks down.')
         for brick in self.bricklist:
@@ -85,33 +128,6 @@ class Space(object):
             while(down):
                 down = self.move_brick_down(brick)
         print('Moved bricks down')
-
-    def count_disin_bricks(self):
-        print('Start to count blocks that can be dissociated.')
-        dissum = 0
-        for index, brick in enumerate(self.bricklist):
-            coord = deepcopy(brick.startc)
-            nosolosupport = True
-            if brick.dim != 2: #take into account vertical bricks.
-                coord[2] += 1
-                for i in range(brick.len):
-                    if tuple(coord) in self.space.keys():
-                        if not self.check_other_support(coord, brick.id):
-                            nosolosupport = False
-
-                    coord[brick.dim] += 1
-            else:
-                coord[2] += brick.len
-                if tuple(coord) in self.space.keys():
-                    if not self.check_other_support(coord, brick.id):
-                        nosolosupport = False
-
-            if nosolosupport:
-                #print('Counted: , ', brick.id)
-                dissum += 1
-            if index % 100 ==0:
-                print( "Tried " , index , " blocks already.")
-        return dissum
 
 
     def check_other_support(self,coord, iden):
@@ -121,7 +137,7 @@ class Space(object):
         if brick.dim != 2:
             for i in range(brick.len):
                 if tuple(startc) in self.space.keys(): 
-                    if self.space[tuple(startc)] != iden:
+                    if self.space[tuple(startc)] not in iden:
                         return True
                 startc[brick.dim] += 1
         return False
@@ -143,7 +159,7 @@ def main(args , **kwargs):
         bricklist.append(Brick([int(s) for s in coord[0].split(',')] ,[int(e) for e in coord[1].split(',')], index) )
 
     bl = Space(bricklist)
-    result = bl.count_disin_bricks()
+    result = bl.count_bricks_above()
     print('Result is: ' , result)
 
 
@@ -162,7 +178,7 @@ if __name__ == "__main__":
 
     lines = [line.strip() for line in stringlist.strip().split('\n')]
     print(lines)
-    assert main(lines) == 5
+    assert main(lines) == 7
 
     file = "inputday22.txt"
     with open(file,'r') as f:
