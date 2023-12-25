@@ -20,6 +20,7 @@ class PathSearcher(object):
         self.path = Path(gmap,startc,startstep,endc,steps)
         self.future_paths = []
         self.ended_paths = []
+        self.maxsteps = 0
         self.evolve_path()
         self.run()
 
@@ -28,16 +29,18 @@ class PathSearcher(object):
             self.path.step()
         if self.path.ended:
             self.ended_paths.append(deepcopy(self.path))
-        self.future_paths += deepcopy(self.path.splitpos)
+            if self.path.steps > self.maxsteps:
+                self.maxsteps = self.path.steps
+                print('New maxsteps: ' , self.maxsteps)
+        self.future_paths += self.path.splitpos
         #print(self.future_paths)
 
     def spawn_new_path(self):
         data = self.future_paths.pop()
-        print('Started Spawning paths at split points.')
+        #print('Started Spawning paths at split points.')
         for step in data[1]:
             self.path = Path(self.gmap,data[0],step , self.endc, data[2], data[3])
             self.evolve_path()
-            #sys.exit(0)
 
     def run(self):
         while(len(self.future_paths) != 0):
@@ -62,7 +65,7 @@ class Path(object):
         steps = self.currentpos.get_pos_steps(self.gmap,self.history)
         if len(steps) == 0:
             self.alive = False
-            print('Path Died at : ' , str(self.currentpos))
+            #print('Path Died at : ' , str(self.currentpos))
         elif len(steps) == 1:
             self.history.add(self.currentpos.coord)
             self.currentpos = self.currentpos.step(steps[0])
@@ -78,7 +81,7 @@ class Path(object):
 
         if self.currentpos.coord == self.endpos:
             self.ended = True
-            print('Path ended at steps: ' , self.steps)
+            #print('Path ended at steps: ' , self.steps)
 
     def __str__(self):
         outputstr = 'Ended: ' + str(self.ended) + '\n'
@@ -176,8 +179,8 @@ if __name__ == "__main__":
 """
 #    lines = [line.strip() for line in stringlist.strip().split('\n')]
 #    print(lines)
-#    assert main(lines) == 94
-#
+#    assert main(lines) == 154
+
     file = "inputday23.txt"
     with open(file,'r') as f:
         lines = f.readlines()
