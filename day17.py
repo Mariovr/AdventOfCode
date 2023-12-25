@@ -14,16 +14,18 @@ import sys
 import re
 
 class Hmap(object):
-    def __init__(self, hmap, startpos = (0,0)  ):
+    def __init__(self, hmap, startpos = (0,0), w_dir_steps_allowed = 300  ):
         self.hmap = hmap
         self.vdim = len(hmap)
         self.hdim = len(hmap[0])
         self.startpos = Position(startpos ,0 , (0,1), 0, self.hdim, self.vdim )
         self.endpos = Position((self.vdim - 1 , self.hdim - 1), 0, (0,1), 0, self.hdim, self.vdim   )
-        self.minhloss = self.go_naive_end(self.startpos, self.endpos)
-        self.minhloss = 652 #upperbound of previous runs, it can be determined by either having a larger heuristic cost function (multiply a factor to the difference in coordinates with the endpoint) or reduce the searchspace of unique positions by not including the number of steps in same direction, and/or the current stepdirection for the uniqueness of a position.
+        #self.minhloss = self.go_naive_end(self.startpos, self.endpos)
+        self.minhloss = 1000 #upperbound of previous runs, it can be determined by either having a larger heuristic cost function (multiply a factor to the difference in coordinates with the endpoint) or reduce the searchspace of unique positions by not including the number of steps in same direction, and/or the current stepdirection for the uniqueness of a position.
         self.poslist = [self.startpos]
         self.checked = []
+        self.minstepneeded = abs(self.startpos.coord[0] - self.endpos.coord[0]) + abs(self.startpos.coord[1] - self.endpos.coord[1])
+        self.w_dir_steps_allowed = w_dir_steps_allowed
 
     def run(self):
         steps = 0
@@ -32,9 +34,10 @@ class Hmap(object):
             extend = min(spos , key = lambda x: x[1])
             #print(npos) 
             npos = self.get_next_pos(extend[0])
-            if steps % 1000 == 0:
+            if steps % 50 == 0:
                 self.clean_death_path()
-                print('Current Hloss: ', extend[0].hloss)
+                if steps % 10000 == 0:
+                    print('Current Hloss: ', extend[0].hloss)
 
             for startpos in npos:
                 if startpos not in self.checked and startpos not in self.poslist:
@@ -56,9 +59,14 @@ class Hmap(object):
 
     def clean_death_path(self):
         for pos in self.poslist:
-            if self.cost(pos,self.endpos) > self.minhloss:
+            if abs(pos.coord[0] - self.endpos.coord[0]) + abs(pos.coord[1] - self.endpos.coord[1]) > self.minstepneeded - pos.steps + self.w_dir_steps_allowed : # allowed steps in wrong direction
                 self.checked.append(pos)
                 self.poslist.remove(pos)
+
+            if self.cost(pos,self.endpos) > self.minhloss:
+                self.checked.append(pos)
+                if pos in self.poslist:
+                    self.poslist.remove(pos)
 
     def cost(self, pos, end):
         #return pos.hloss + abs(pos.coord[0] - end.coord[0])*2 + abs(pos.coord[1] - end.coord[1])*2 #can return 652
@@ -83,7 +91,7 @@ class Hmap(object):
         return outputstr
 
 class Position(object):
-    def __init__(self, coord, hloss, step, sdirsteps, hdim, vdim):
+    def __init__(self, coord, hloss, step, sdirsteps, hdim, vdim, steps = 0):
         self.coord= coord
         self.hloss = hloss #tot heatloss related to contained path
         self.sdirsteps = sdirsteps
@@ -92,16 +100,18 @@ class Position(object):
         self.hdim = hdim
         self.vdim = vdim
         self.boundchecks = ((0,self.vdim-1) , (0,self.hdim-1) )
+        self.steps = steps
 
     def step(self, coord, hmap):
         newc0 = self.coord[0] + coord[0] 
         newc1 = self.coord[1] + coord[1] 
+        self.steps += 1
         if coord == self.cdir:
             sdirs = self.sdirsteps + 1
         else:
             sdirs = 1
         assert sdirs <= 3
-        return Position( (self.coord[0] + coord[0] , self.coord[1] + coord[1] ), self.hloss + hmap[newc0][newc1] , coord, sdirs, self.hdim, self.vdim)
+        return Position( (newc0 , newc1 ), self.hloss + hmap[newc0][newc1] , coord, sdirs, self.hdim, self.vdim, self.steps)
 
     def get_pos_steps(self):
         steps = []
