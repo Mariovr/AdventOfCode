@@ -12,12 +12,12 @@ import sys
 import re
 
 #Running the program with a large number of steps, gives for example the following output at important points.
-#('At step: ', 196, 'we have pos occupied: ', 35082)  -> with this info we can calculate the number of points in 4tips + 1S (in all 4 quadrants), this is an invariant and will be added to all higher results in square space.
+#('At step: ', 196, 'we have pos occupied: ', 35082)  -> with this info we can calculate approx. the number of points in 4tips + 1S (in all 4 quadrants), this will be added to all higher results in square space, but it is 9 points off from the real number as it needed more steps to reach a stable state. 
 #('At step: ', 327, 'we have pos occupied: ', 97230)
 #('dif', 62148)
 #('At step: ', 458, 'we have pos occupied: ', 190388) 
 #('dif', 93158)
-#('At step: ', 589, 'we have pos occupied: ', 314556) -> with the difference of this result and the previous even step in square space we can calculate B(4quandrants) + S(4Quadrants) (together with odd and even parity of a full square we have all ingredients for our formula, that predicts the value of even increments in squarespace (as 202300 is even). 
+#('At step: ', 589, 'we have pos occupied: ', 314556) -> with the difference of this result and the previous even step in square space we can calculate B(4quandrants) + S(4Quadrants) (together with odd and even parity of a full square we have all ingredients for our formula, that predicts the number of positions for even increments in squarespace (as 202300 is even). 
 #('dif', 124168)
 #('At step: ', 720, 'we have pos occupied: ', 469734)
 #('dif', 155178)
@@ -30,9 +30,10 @@ import re
 #('At step: ', 1244, 'we have pos occupied: ', 1400546)
 #......
 def calc_result(odd = 7757, even = 7748,nsqr = 202300):
-    S4QTIP4 = 35082 - odd  #make use of result after 196 steps (it has 4 tips and 1 S in all 4 quadrants)
-    S4QB4Q = (314556 - 97230)/2. - 6*even - 4*odd #make use of the difference between 589 and 327 steps this contains S4Q + B4Q + 12 even + 8 odd = res589 - res327
-    res = nsqr**2 * even + (nsqr-1)**2 * odd + S4QTIP4 + (nsqr-1)*S4QB4Q+9 #General formula to predict points after even increments in square space. (e.g. for n = 2 -> 97230, n = 4, 314556, ....). (Note weirdly enough had to add 9 to make it work, maybe a corner case in my input, some strange turn that is luckely consistent.
+    #S4QTIP4 = 35082 - odd  #make use of result after 196 steps (it has almost 4 tips and 1 S in all 4 quadrants), but it didnt converge enough it had 9 points to little, therefore its better to use the result after 589 steps, to determine S4QTIP4 as well.
+    S4QB4Q = (314556 - 97230)/2. - 6*even - 4*odd #make use of the difference between 589 and 327 steps this contains 2* (S4Q + B4Q) + 12 even + 8 odd = res589 - res327
+    S4QTIP4 = 314556 - 9 * odd - 16 *even  - 3 * S4QB4Q #make use of result after 589 steps, and the prev. calculated S4QB4Q (it has 4 tips and 1 S in all 4 quadrants)
+    res = nsqr**2 * even + (nsqr-1)**2 * odd + S4QTIP4 + (nsqr-1)*S4QB4Q #General formula to predict points after even increments in square space. (e.g. for n = 2 -> 97230, n = 4, 314556, ....).
     return res
 
 
@@ -50,24 +51,17 @@ def test_c(newc, gmap,e, fy, fx):
 #(y,x, field vert,field hor)
 def main(args , **kwargs):
     gmap = {}
-    result = 0
-    #numstep = 26501365 
     numstep = 5000 
     startc = (0,0, 0 , 0)
 
     vdim = len(args)
     hdim = len(args[0])
-    ndots = 0
     for ind , line in enumerate(args):
         sp = re.search(r'S' , line)
-        ndots += line.count('.')
         if sp:
             startc = ((ind , sp.start()) , 0 , 0)
-            #startc = (ind , sp.start() )
         gmap.update( {(ind,i):ch for i,ch in enumerate(line)} )
 
-    ndots += 1 #to account start dot
-    print('Numdots: ' , ndots)
     gmap[startc[0]] = '.'
     d = set([startc])
     print(d)
@@ -92,14 +86,13 @@ def main(args , **kwargs):
         if  (((i +1) - 65) % 131) == 0: #at the points where we start a new square (new max fy or fy).
             print('At step: ' , i +1, 'we have pos occupied: ' , len(d))
             print('dif' , len(d) - savesol)
-            print('At step: ' , i , 'we have max fy: ' , max(d, key = lambda x : x[1]))
-            print('At step: ' , i , 'we have max fx: ' , max(d, key = lambda x : x[2]))
-            print('At step: ' , i , 'we have min fy: ' , min(d, key = lambda x : x[1]))
-            print('At step: ' , i , 'we have min fx: ' , min(d, key = lambda x : x[2]))
+            #print('At step: ' , i + 1 , 'we have max fy: ' , max(d, key = lambda x : x[1]))
+            #print('At step: ' , i + 1, 'we have max fx: ' , max(d, key = lambda x : x[2]))
+            #print('At step: ' , i + 1, 'we have min fy: ' , min(d, key = lambda x : x[1]))
+            #print('At step: ' , i + 1, 'we have min fx: ' , min(d, key = lambda x : x[2]))
             savesol = len(d)
 
-    result = len(d)
-    return result
+    return 0
 
 if __name__ == "__main__":
     print(calc_result(odd = 7757, even = 7748,nsqr =2))
@@ -113,6 +106,5 @@ if __name__ == "__main__":
 #    with open(file,'r') as f:
 #        lines = f.readlines()
 #        lines = [line.strip() for line in lines]
-#    result = main(lines)
-#    print('Result is: ', result)
-
+#    main(lines)
+#
