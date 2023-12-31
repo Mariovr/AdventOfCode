@@ -20,7 +20,7 @@ sys.setrecursionlimit(10000)
 
 """
 This code contains three solutions to the problem:
-1) Using an external package networkx. (works only for the real problem)
+1) Using an external package networkx. 
 2) A naieve implementation of the Karger algorithm, using the fact that we know the minimal cut is three. (works for both the real and sample problem)
    Ref.: https://web.stanford.edu/class/archive/cs/cs161/cs161.1172/CS161Lecture16.pdf
 3) A brute force solution. (works only for the sample problem)
@@ -32,7 +32,11 @@ def min_cut_using_networkx(links):
     for link in [list(lnk ) for lnk in links]:
         G.add_edge(link[0], link[1], capacity=1.0)
         G.add_edge(link[1], link[0], capacity=1.0)
-    cut_value, partition = nx.minimum_cut(G,list(links[0])[0] , list(links[-1])[1])
+    cut_value = 100
+    while cut_value > 3:
+        sam = random.sample(links , 2)
+        if list(sam[0])[0] != list(sam[1])[1]:
+            cut_value, partition = nx.minimum_cut(G,list(sam[0])[0] , list(sam[1])[1])
     reachable, non_reachable = partition
     print('Cut value is: ' , cut_value)
     #print(reachable)
@@ -104,7 +108,7 @@ def main(args , **kwargs):
             if d not in links:
                 links.append(d) # link has no order.
 
-    #1) Solution using networkx (but doesnt work for the sample problem).
+    #1) Solution using networkx.
     min_cut_using_networkx(links)
 
     #2) Solution using the Karger algorithm (works for both the sample and real problem).
@@ -157,10 +161,12 @@ rzs: qnr cmg lsr rsh
 frs: qnr lhk lsr
 """
 
+    print('Start to solve sample problem: ')
     lines = [line.strip() for line in stringlist.strip().split('\n')]
     print(lines)
     assert main(lines) == 54
 
+    print('Start to solve real problem: ')
     file = "inputday25.txt"
     with open(file,'r') as f:
         lines = f.readlines()
