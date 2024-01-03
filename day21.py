@@ -9,8 +9,6 @@
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python 
 
-import os
-import sys
 import re
 
 def test_c(newc, gmap,e):
@@ -21,34 +19,33 @@ def test_c(newc, gmap,e):
     if  it == '.' :
         e.add(newc)
 
-def main(args , **kwargs):
-    gmap = {}
-    result = 0
-    numstep = 64 #numstep = 6 for sample problem.
-    numstep = 10000
-    startc = (0,0)
+def get_opos(gmap, startc = (0,0), numstep = 64):
+    d = set([startc])
+    for i in range(numstep):
+        e = set()
+        for coord in d:
+            for newc in [(coord[0] + 1, coord[1]),(coord[0] -1, coord[1]),(coord[0] , coord[1]+1),(coord[0], coord[1]-1)]:
+                test_c(newc,gmap,e)
+        d = e
+        #print('At step: ' , i+1 , 'we have pos occupied: ' , len(d))
+    return len(d)
 
+def main(args , sample = True):
+    gmap = {}
+    if sample:
+        numstep = 6
+    else:
+        numstep = 64 #numstep = 6 for sample problem.
+
+    startc = (0,0)
     for ind , line in enumerate(args):
         sp = re.search(r'S' , line)
         if sp:
             startc = (ind , sp.start() )
         gmap.update( {(ind,i):ch for i,ch in enumerate(line)} )
 
-    #print(gmap)
-    
     gmap[startc] = '.'
-    d = set([startc])
-    #print(d)
-    for i in range(numstep):
-        e = set()
-        for coord in d:
-            for newc in [(coord[0] + 1, coord[1]),(coord[0] -1, coord[1]),(coord[0] , coord[1]+1),(coord[0], coord[1]-1)]:
-                test_c(newc,gmap,e)
-            #print(e)
-        d = e
-        print('At step: ' , i+1 , 'we have pos occupied: ' , len(d))
-
-    result = len(d)
+    result = get_opos(gmap, startc, numstep)
     return result
 
 if __name__ == "__main__":
@@ -64,16 +61,14 @@ if __name__ == "__main__":
 .##..##.##.
 ...........
 """
-#    lines = [line.strip() for line in stringlist.strip().split('\n')]
-#    print(lines)
-#    assert main(lines) == 16
-#
+    lines = [line.strip() for line in stringlist.strip().split('\n')]
+    print(lines)
+    assert main(lines,True) == 16
+
     file = "inputday21.txt"
     with open(file,'r') as f:
         lines = f.readlines()
         lines = [line.strip() for line in lines]
-    result = main(lines)
+    result = main(lines,False)
     print('Result is: ', result)
-
-
 
