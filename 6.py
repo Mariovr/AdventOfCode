@@ -47,6 +47,7 @@ def main(args, **kwdmap):
             startp = (i,j)
 
     vpos = main1(dmap, startp , 0 , stepl)
+    write_map(dmap)
     print('Result 1: ' , vpos)
 
     pos = startp
