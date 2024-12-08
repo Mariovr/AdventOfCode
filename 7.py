@@ -97,5 +97,3 @@ if __name__ == "__main__":
     result = main(lines)
     print('Result is: ', result)
 
-
-

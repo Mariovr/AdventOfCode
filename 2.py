@@ -59,7 +59,7 @@ if __name__ == "__main__":
     lines = [line.strip() for line in stringlist.strip().split('\n')]
     assert main(lines) == 4
 
-    file = "inputday2.txt"
+    file = "input2.txt"
     with open(file,'r') as f:
         lines = f.readlines()
         lines = [line.strip() for line in lines]
