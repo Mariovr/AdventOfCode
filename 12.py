@@ -29,7 +29,6 @@ def main(args , **kwargs):
                 tsurf = 0
                 nsurf = 0
                 slist.append((i,j))
-                #print('start:' , i , j)
                 surfl = set()
                 while slist:
                     x , y = slist.pop()
@@ -42,7 +41,7 @@ def main(args , **kwargs):
                             slist.append((xx,yy))
                             seen.add((xx,yy) )
 
-                        if not (0<= xx < dimx) or not (0 <= yy < dimy) or not (l == dmap[(xx,yy)]) and (xx,yy) :
+                        if not (0<= xx < dimx) or not (0 <= yy < dimy) or not (l == dmap[(xx,yy)]):
                             cf = False
                             tx , ty = xx , yy
                             ncon = 0
@@ -57,9 +56,6 @@ def main(args , **kwargs):
                             #already counted this side to much
                             if ncon > 1:
                                 tsurf -= 1
-                            #print('tsurf:' , x , y, tsurf)
-
-                #print('are surf:' , area , tsurf)
                 result += area * tsurf
                 result1 += area * nsurf
 
