@@ -57,6 +57,7 @@ def main(args , **kwargs):
                     nx = x - 1
                     if 0<= nx < dimx and (nx,y) in nplist and (nx,y) not in checked:
                           d.append((nx,y))
+                #should be a line of at least 10 for the trunk
                 if ttsz > 10:
                     print('#for time t:', t, 'ttsz : ' , ttsz)
                     dmap=[['.' for i in range(dimy)] for j in range( dimx)]
