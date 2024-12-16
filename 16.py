@@ -32,11 +32,11 @@ stringlist ="""#################
 #.#.#.#########.#
 #S#.............#
 #################
-""" #11048 , 64 tiles part of best paths
+""" #11048 for part 1, 64 tiles part of best paths for part 2
 #input = [line for line in stringlist.strip().split('\n')]
 print(input)
 
-#Some kind of brute force but only works for the example problem :(
+#Brute force but only works for the example problem :(
 def move(pos ,oor, mp, xdim , ydim, ec, seen, cost):
     #min cost to reach a square
     stepl = [ [0, 1],  [1, 0],  [0, -1],  [-1, 0]]
@@ -76,7 +76,7 @@ def parts():
             if l =='E':
                 ec = (i,j)
                 mp[(i,j)] = '.'
-    #cost = move(sc , oor, mp ,dimx , dimy, ec, seen , cost)
+    #cost = move(sc , oor, mp ,dimx , dimy, ec, seen , cost) #brute force solution for part1, but only works for example problem
     print('dims:' , dimx ,dimy)
     print('s' , sc)
     print('e' , ec)
