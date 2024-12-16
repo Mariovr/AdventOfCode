@@ -52,14 +52,11 @@ v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^
 steps = [[0, 1], [1, 0], [0, -1], [-1, 0]]
 
 def part1():
-    res = 0
-    inpm, inpa = input[0].split('\n'), input[1].strip()
+    inpm, inpa = input[0].split('\n'), ''.join(input[1].split('\n'))
     stepd = { '>': [0, 1], 'v': [1, 0], '<': [0, -1], '^': [-1, 0]}
-    dimx = len(inpm)
-    dimy = len(inpm[0])
+    dimx, dimy = len(inpm),  len(inpm[0])
     print('dims:' , dimx ,dimy)
     mp = {}
-    plist = []
     sc = (0,0)
     for i, line in enumerate(inpm):
         for  j, l in enumerate( list(line)):
@@ -68,11 +65,7 @@ def part1():
                 sc = (i,j)
                 mp[(i,j)] = '.'
     nsc = (0,0)
-    print(sc)
-    inpaa = ''
-    for a in inpa.split('\n'):
-        inpaa += a
-    for i in list(inpaa):
+    for i in list(inpa):
         ns = stepd[i]
         nsc = (sc[0] + ns[0] , sc[1]+ns[1])
         if mp[nsc] == '.':
@@ -83,8 +76,7 @@ def part1():
             d = deque([nsc])
             while(d):
                 o1,o2 = d.pop()
-                no1 = o1 + ns[0]
-                no2 = o2 + ns[1]
+                no1,no2 = o1 + ns[0],  o2 + ns[1]
                 if mp[(no1,no2)] == 'O':
                     d.append((no1,no2))
                 elif mp[(no1,no2)] == '#':
@@ -93,8 +85,7 @@ def part1():
                     mp[(no1,no2)] = 'O' 
                     mp[nsc] = '.' 
                     sc = nsc
-
-    #print(mp)
+    res = 0
     for i in range(dimx):
         for j in range(dimy):
             if mp[(i,j)] == 'O':
@@ -111,7 +102,6 @@ def part2():
     dimy = len(inpm[0])*2
     print('dims:' , dimx ,dimy)
     mp = {}
-    plist = []
     sc = (0,0)
     for i, line in enumerate(inpm):
         for  j, l in enumerate( list(line)):
