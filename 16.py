@@ -120,7 +120,6 @@ def parts():
             d.append((r[0] , r[1], r[2]))
     return res, len(otlist)
 
-#result1 = part1()
 result1 , result2 = parts()
 # Submit
 print('Result 1:', result1)
