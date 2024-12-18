@@ -36,7 +36,7 @@ stringlist ="""#################
 #input = [line for line in stringlist.strip().split('\n')]
 print(input)
 
-#Brute force but only works for the example problem :(
+#Brute force but only works for the example problem, keep this as interesting application of recursion.
 def move(pos ,oor, mp, xdim , ydim, ec, seen, cost):
     #min cost to reach a square
     stepl = [ [0, 1],  [1, 0],  [0, -1],  [-1, 0]]
