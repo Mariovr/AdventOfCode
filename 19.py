@@ -76,11 +76,10 @@ def find_parts(s):
     for i in range(1,maxpl+1):
         newl = []
         if s[:i] in patl:
-            newl.append(s[:i])
             if test(s[i:]):
+                newl.append(s[:i])
                 for j in find_parts(s[i:]):
-                    if newl + j not in vp:
-                        vp.append(newl + j)
+                    vp.append(newl + j)
             else:
                 newl = []
     pcache[s] = vp
