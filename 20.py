@@ -10,6 +10,7 @@
 #! /usr/bin/env python 
 from collections import Counter, defaultdict, deque #defaultdict provides default function when accessing key not present
 
+#Note best to run with pypy.
 with open('input20.txt','r') as aoc:
     text = aoc.read()
 inpa = text.strip().split('\n')
@@ -109,7 +110,7 @@ def parts():
         print('Result for cheat length: ' , cl , ' is: ' , res)
         #for k , v in chl.items(): #for debugging purposes prints the number of steps saved, together with the number of cheats that allows to save that number of steps.
             #print('dif: ' , k , 'num cheats: ' , len(v))
-    return res
+    return resl[0] , resl[1]
 
 result1,result2 = parts()
 print('Result 1:', result1)
