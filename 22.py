@@ -40,8 +40,9 @@ def find_sell_p(seql, optseq):
 def find_p_map(seql):
     pmap = {}
     for i in range(0,len(seql)-3,1):
-        if [dif   for dif , p in seql[i:i+4]] not in [list(key) for key in pmap.keys()]: #only first occurence of a difference sequence is relevant
-            pmap[tuple(dif   for dif , p in seql[i:i+4])] = seql[i+3][1]
+        key = tuple(dif   for dif , p in seql[i:i+4])
+        if key not in pmap: #goes much faster but only the second list it proposes is correct
+            pmap[key] = seql[i+3][1]
     return pmap
 
 def parts():
@@ -58,6 +59,7 @@ def parts():
         res1 += val
         difl = [(b -a , b) for a,b in zip(seql , seql[1:]) ]
         #res += find_sell_p(difl , optseq) #to check correct optimum sequence list.
+        print('number i map created:' , i )
         maxp = find_p_map(difl)
         mapl.append(maxp)
     #print('result with optseq:' , optseq, res) #to check correct optimum sequence list
