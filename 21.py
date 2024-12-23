@@ -160,7 +160,7 @@ def get_a_parts(target, cnt = 1):
             partcount[text] +=1 *cnt
     return partcount
 
-def iterate(target, n):
+def iterate(target, n): #While only keeping tracks of different parts between A's and their respective counts, as these parts can be treated independently.
     cache = {}
     pc = get_a_parts(target)
     resl = []
