@@ -41,7 +41,7 @@ def find_p_map(seql):
     pmap = {}
     for i in range(0,len(seql)-3,1):
         key = tuple(dif   for dif , p in seql[i:i+4])
-        if key not in pmap: #goes much faster but only the second list it proposes is correct
+        if key not in pmap: 
             pmap[key] = seql[i+3][1]
     return pmap
 
