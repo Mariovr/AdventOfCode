@@ -8,51 +8,16 @@
 #
 # -*- coding: utf-8 -*-
 #! /usr/bin/env python 
+import sys
 from aoc import AOC
 
-aoc = AOC(25 , 2024)
-inpa = aoc.input.strip().split('\n\n')
-stringlist ="""#####
-.####
-.####
-.####
-.#.#.
-.#...
-.....
+if len(sys.argv) > 1:
+    example = open(sys.argv[1]).read().strip()
+    inpa = [line for line in example.strip().split('\n\n')]
+else:
+    aoc = AOC(25 , 2024)
+    inpa  = aoc.input.strip().split('\n\n')
 
-#####
-##.##
-.#.##
-...##
-...#.
-...#.
-.....
-
-.....
-#....
-#....
-#...#
-#.#.#
-#.###
-#####
-
-.....
-.....
-#.#..
-###..
-###.#
-###.#
-#####
-
-.....
-.....
-.....
-#....
-#.#..
-#.#.#
-#####
-"""
-#inpa = [line for line in stringlist.strip().split('\n\n')]
 def part():
     res, collim = 0,0
     keyl,lockl = [], []
