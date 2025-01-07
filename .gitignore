@@ -1,3 +1,7 @@
 *.vsg
 *.swp
 inputday*.txt
+2015/*.txt
+*/secret.py
+*/aoc.py
+*/__*
