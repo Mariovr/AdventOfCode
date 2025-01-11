@@ -24,7 +24,7 @@ else:
 def bfs(people, hapcost):
     hapmax = 0
     startp = people[0]
-    Q = deque([ (0, startp, list() )]) #tot dist, current city, cities visited (starting from random start city)
+    Q = deque([ (0, startp, list() )]) #current happiness with seating arrangement, next person to seat, persons already seated
     while len(Q) > 0:
         chap , cur, pvis = Q.pop()
         pvis.append(cur)
