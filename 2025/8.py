@@ -36,7 +36,7 @@ for i, line in enumerate(inpa):
         dmap[dindexes] = dist(ncoor,  box)
     boxes.append(ncoor)
 
-numconnect = 10
+numconnect = 1000
 groups = [[i] for i in range(len(boxes)) ]
 for i in range(10000000000000000):
     connect = min(dmap, key= dmap.get)
